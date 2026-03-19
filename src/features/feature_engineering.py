@@ -37,8 +37,31 @@ class FeatureEngineering:
             else:
                 df_processed[numerical_columns] = self.scaler.transform(df_processed[numerical_columns])
 
+            logger.info(f"Feature preprocessing completed successfully")
+            logger.info(f"Categorical features processed: {categorical_columns}")
+            logger.info(f"Numerical features processed: {numerical_columns}")
+            return df_processed
+        
         except Exception as e:
             logger.error(f"Error processing features: {e}")
+            raise
+
+    def create_features(self, df):
+        try:
+            df_new = df.copy()
+            
+            # Example feature: Balance per product
+            df_new['BalancePerProduct'] = df_new['Balance'] / (df_new['NumOfProducts'] + 1)
+            
+            # Example feature: Customer engagement score
+            df_new['EngagementScore'] = df_new['IsActiveMember'] * 0.5 + df_new['HasCrCard'] * 0.3 + \
+                                      (df_new['NumOfProducts'] / 4) * 0.2
+            
+            logger.info("Feature creation completed successfully")
+            return df_new
+            
+        except Exception as e:
+            logger.error(f"Error in feature creation: {str(e)}")
             raise
 
         
