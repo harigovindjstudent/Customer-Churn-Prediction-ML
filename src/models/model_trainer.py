@@ -24,33 +24,34 @@ class ModelTrainer:
             best_model = None
             best_score = 0
 
-            for algorithm in self.config['model_training']['algorithms']:
-                if algorithm == 'LogisticRegression':
-                    model = LogisticRegression(**self.config['model_training']['LogisticRegression'])
-                elif algorithm == 'RandomForest':
-                    model = RandomForestClassifier(**self.config['model_training']['RandomForest'])
-                elif algorithm == 'XGBoost':
-                    model = xgb.XGBClassifier(**self.config['model_training']['XGBoost'])
-                else:
-                    logger.warning(f"Unsupported algorithm: {algorithm}")
-                    continue
+            for algorithm in self.config['model']['algorithms']:
+                with mlflow.start_run(run_name=algorithm['name'], nested=True):
+                    if algorithm['name'] == 'logistic_regression':
+                        model = LogisticRegression(**algorithm['parameters'])
+                    elif algorithm['name'] == 'random_forest':
+                        model = RandomForestClassifier(**algorithm['parameters'])
+                    elif algorithm['name'] == 'xgboost':
+                        model = xgb.XGBClassifier(**algorithm['parameters'])
+                    else:
+                        logger.warning(f"Unsupported algorithm: {algorithm['name']}")
+                        continue
 
-                model.fit(X_train, y_train)
-                y_pred = model.predict(X_test)
+                    model.fit(X_train, y_train)
+                    y_pred = model.predict(X_test)
 
-                accuracy = accuracy_score(y_test, y_pred)
-                precision = precision_score(y_test, y_pred)
-                recall = recall_score(y_test, y_pred)
-                f1 = f1_score(y_test, y_pred)
-                roc_auc = roc_auc_score(y_test, model.predict_proba(X_test)[:, 1])
+                    accuracy = accuracy_score(y_test, y_pred)
+                    precision = precision_score(y_test, y_pred)
+                    recall = recall_score(y_test, y_pred)
+                    f1 = f1_score(y_test, y_pred)
+                    roc_auc = roc_auc_score(y_test, model.predict_proba(X_test)[:, 1])
 
-                mlflow.log_metric(f"{algorithm}_accuracy", accuracy)
-                mlflow.log_metric(f"{algorithm}_precision", precision)
-                mlflow.log_metric(f"{algorithm}_recall", recall)
-                mlflow.log_metric(f"{algorithm}_f1_score", f1)
-                mlflow.log_metric(f"{algorithm}_roc_auc", roc_auc)
+                    mlflow.log_metric(f"{algorithm['name']}_accuracy", accuracy)
+                    mlflow.log_metric(f"{algorithm['name']}_precision", precision)
+                    mlflow.log_metric(f"{algorithm['name']}_recall", recall)
+                    mlflow.log_metric(f"{algorithm['name']}_f1_score", f1)
+                    mlflow.log_metric(f"{algorithm['name']}_roc_auc", roc_auc)
 
-                logger.info(f"{algorithm} - Accuracy: {accuracy}, Precision: {precision}, Recall: {recall}, F1 Score: {f1}, ROC AUC: {roc_auc}")
+                    logger.info(f"{algorithm['name']} - Accuracy: {accuracy}, Precision: {precision}, Recall: {recall}, F1 Score: {f1}, ROC AUC: {roc_auc}")
 
                 if f1 > best_score:
                     best_score = f1
