@@ -19,12 +19,14 @@ class ModelTrainer:
     def train_model(self, X_train, X_test, y_train, y_test):
 
         try:
+            #parent experiment
             mlflow.set_experiment("customer_churn_prediction")
             
             best_model = None
             best_score = 0
 
             for algorithm in self.config['model']['algorithms']:
+                #nested = True allows us to track each algorithm's performance separately under the same parent run
                 with mlflow.start_run(run_name=algorithm['name'], nested=True):
                     if algorithm['name'] == 'logistic_regression':
                         model = LogisticRegression(**algorithm['parameters'])
@@ -61,7 +63,7 @@ class ModelTrainer:
             return best_model, best_score    
 
         except Exception as e:
-            logger.error(f"Error setting MLflow experiment: {e}")
+            logger.error(f"Error training model: {e}")
             raise
 
     def _save_model(self, model):
