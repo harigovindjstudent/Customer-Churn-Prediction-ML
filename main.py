@@ -20,3 +20,20 @@ def main():
         df = DataLoader_instance.load_data()
         #split data
         X_train, X_test, y_train, y_test = DataLoader_instance.split_data(df)
+
+        #feature engineering
+        X_train = FeatureEngineering_instance.create_features(X_train)
+        X_test = FeatureEngineering_instance.create_features(X_test)
+
+        #feature processing
+        X_train_processed = FeatureEngineering_instance.process_features(X_train, is_training=True)
+        X_test_processed = FeatureEngineering_instance.process_features(X_test, is_training=False)
+
+        #model training
+        best_model, best_score = ModelTrainer_instance.train_model(X_train_processed, X_test_processed, y_train, y_test)
+
+        logger.info(f"Best model trained with F1 Score: {best_score}")
+
+    except Exception as e:
+        logger.error(f"Error in main execution: {e}")
+        raise    
