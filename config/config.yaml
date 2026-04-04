@@ -21,7 +21,7 @@ model:
         learning_rate: 0.1
         max_depth: 6
   
-  best_model_path: /models/best_model.pkl
+  best_model_path: models/best_model.pkl
 
 metrics:
   track:
