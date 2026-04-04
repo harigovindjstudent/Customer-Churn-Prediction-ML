@@ -25,7 +25,7 @@ class ModelTrainer:
             best_model = None
             best_score = 0
 
-            for algorithm in self.config['model']['algorithms']:
+            for algorithm in self.config['model']['algorithm']:
                 #nested = True allows us to track each algorithm's performance separately under the same parent run
                 with mlflow.start_run(run_name=algorithm['name'], nested=True):
                     if algorithm['name'] == 'logistic_regression':

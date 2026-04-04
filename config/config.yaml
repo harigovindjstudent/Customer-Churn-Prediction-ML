@@ -1,6 +1,6 @@
 data:
-  raw_data_path: /data/Churn_Modelling.csv
-  processed_data_path: /data/processed/churn_data.csv
+  raw_data_path: data/Churn_Modelling.csv
+  processed_data_path: data/processed/churn_data.csv
   test_size: 0.2
   random_state: 42
 
