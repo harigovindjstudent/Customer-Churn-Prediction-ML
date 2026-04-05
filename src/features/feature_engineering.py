@@ -23,6 +23,7 @@ class FeatureEngineering:
             numerical_columns = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
             logger.info(f"Categorical columns: {categorical_columns}")
             logger.info(f"Numerical columns: {numerical_columns}")
+            logger.info("="*50)
 
             categorical_transformer = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
             numerical_transformer = StandardScaler()
@@ -40,9 +41,11 @@ class FeatureEngineering:
             ])
 
             logger.info("Pipeline built successfully")
+            logger.info("="*50)
 
         except Exception as e:
             logger.error(f"Error building pipeline: {e}")
+            logger.error("="*50)
             raise
 
     def process_features(self, df, is_training=True):
@@ -66,11 +69,13 @@ class FeatureEngineering:
                 index=df.index)
             
             logger.info("Feature preprocessing completed successfully")
+            logger.info("="*50)
 
             return df_processed
 
         except Exception as e:
             logger.error(f"Error processing features: {e}")
+            logger.error("="*50)
             raise
 
     def create_features(self, df):
@@ -85,10 +90,52 @@ class FeatureEngineering:
                                       (df_new['NumOfProducts'] / 4) * 0.2
             
             logger.info("Feature creation completed successfully")
+            logger.info("="*50)
             return df_new
             
         except Exception as e:
             logger.error(f"Error in feature creation: {str(e)}")
+            logger.error("="*50)
             raise
 
+    def smote(self, X_train, y_train):
+        try:
+            from imblearn.over_sampling import SMOTE
+            smote = SMOTE(random_state=self.config['data']['random_state'])
+            X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
+
+            logger.info("SMOTE oversampling completed successfully")
+            logger.info("="*50)
+
+            return X_train_resampled, y_train_resampled
+        except Exception as e:
+            logger.error(f"Error in SMOTE oversampling: {str(e)}")
+            logger.error("="*50)
+            raise
+
+    def select_k_features(self, X_train, y_train, X_val, X_test, k=10):
+        try:
+            from sklearn.feature_selection import SelectKBest, f_classif
+            selector = SelectKBest(score_func=f_classif, k=k)
+            X_train_selected = selector.fit_transform(X_train, y_train)
+            X_val_selected = selector.transform(X_val)
+            X_test_selected = selector.transform(X_test)
+
+            selected_feature_names = selector.get_feature_names_out(input_features=X_train.columns).tolist()
+            logger.info(f"Selected {k} features: {selected_feature_names}")
+            logger.info("="*50)
+
+            X_train_selected = pd.DataFrame(X_train_selected, columns=selected_feature_names)
+            X_val_selected = pd.DataFrame(X_val_selected, columns=selected_feature_names, index=X_val.index)
+            X_test_selected = pd.DataFrame(X_test_selected, columns=selected_feature_names, index=X_test.index)
+
+            logger.info(f"Feature selection completed successfully. Selected top {k} features.")
+            logger.info("="*50)
+
+            return X_train_selected, X_val_selected, X_test_selected    
+        
+        except Exception as e:
+            logger.error(f"Error in feature selection: {str(e)}")
+            logger.error("="*50)
+            raise
         

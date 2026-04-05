@@ -36,6 +36,7 @@ class ModelTrainer:
                         model = xgb.XGBClassifier(**algorithm['parameters'])
                     else:
                         logger.warning(f"Unsupported algorithm: {algorithm['name']}")
+                        logger.warning("="*50)
                         continue
 
                     model.fit(X_train, y_train)
@@ -54,6 +55,7 @@ class ModelTrainer:
                     mlflow.log_metric(f"{algorithm['name']}_roc_auc", roc_auc)
 
                     logger.info(f"{algorithm['name']} - Accuracy: {accuracy}, Precision: {precision}, Recall: {recall}, F1 Score: {f1}, ROC AUC: {roc_auc}")
+                    logger.info("="*50)
 
                 if f1 > best_score:
                     best_score = f1
@@ -64,6 +66,7 @@ class ModelTrainer:
 
         except Exception as e:
             logger.error(f"Error training model: {e}")
+            logger.error("="*50)
             raise
 
     def _save_model(self, model):
@@ -73,3 +76,4 @@ class ModelTrainer:
         os.makedirs(os.path.dirname(model_path), exist_ok=True)
         joblib.dump(model, model_path)
         logger.info(f"Model saved to {model_path}")
+        logger.info("="*50)

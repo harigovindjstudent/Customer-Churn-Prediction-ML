@@ -18,24 +18,37 @@ def main():
 
         #load data
         df = DataLoader_instance.load_data()
+        
         #split data
-        X_train, X_test, y_train, y_test = DataLoader_instance.split_data(df)
+        X_train, X_val, X_test, y_train, y_val, y_test = DataLoader_instance.split_data(df)
 
-        #feature engineering
+        #feature creation
         X_train = FeatureEngineering_instance.create_features(X_train)
+        X_val = FeatureEngineering_instance.create_features(X_val)
         X_test = FeatureEngineering_instance.create_features(X_test)
 
         #feature processing
         X_train_processed = FeatureEngineering_instance.process_features(X_train, is_training=True)
+        X_val_processed = FeatureEngineering_instance.process_features(X_val, is_training=False)
         X_test_processed = FeatureEngineering_instance.process_features(X_test, is_training=False)
+        
+        #feature selection
+        X_train_processed, X_val_processed, X_test_processed = FeatureEngineering_instance.select_k_features(
+            X_train_processed, y_train, X_val_processed, X_test_processed, k=10
+        )
+
+        #handle class imbalance on train data
+        X_train_processed, y_train = FeatureEngineering_instance.smote(X_train_processed, y_train)
 
         #model training
         best_model, best_score = ModelTrainer_instance.train_model(X_train_processed, X_test_processed, y_train, y_test)
 
         logger.info(f"Best model trained with F1 Score: {best_score}")
+        logger.info("="*50)
 
     except Exception as e:
         logger.error(f"Error in main execution: {e}")
+        logger.error("="*50)
         raise    
 
 if __name__ == "__main__":

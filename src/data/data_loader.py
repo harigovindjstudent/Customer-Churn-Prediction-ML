@@ -17,9 +17,11 @@ class DataLoader:
         try :
             data_path = self.config['data']['raw_data_path']
             logger.info(f"Loading data from {data_path}")
+            logger.info("="*50)
             return pd.read_csv(data_path)
         except Exception as e:
             logger.error(f"Error loading data: {e}")
+            logger.error("="*50)
             raise
     
     def split_data(self, df):
@@ -45,7 +47,9 @@ class DataLoader:
             )
             
             logger.info(f"Data split into train, validation, and test sets with test size {self.config['data']['test_size']} and validation size {self.config['data']['val_size']}")
+            logger.info("="*50)
             return X_train, X_val, X_test, y_train, y_val, y_test
         except Exception as e:
             logger.error(f"Error splitting data: {e}")
+            logger.error("="*50)
             raise
