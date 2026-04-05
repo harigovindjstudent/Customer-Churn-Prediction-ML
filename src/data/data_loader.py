@@ -27,14 +27,25 @@ class DataLoader:
             X = df.drop(columns=['Exited'])
             y = df['Exited']
 
-            X_train, X_test, y_train, y_test = train_test_split(
+            test_size = self.config['data']['test_size']
+            val_size = self.config['data']['val_size']
+            random_state = self.config['data']['random_state']
+
+            X_temp, X_test, y_temp, y_test = train_test_split(
                 X, 
                 y, 
-                test_size=self.config['data']['test_size'], 
-                random_state=self.config['data']['random_state'])
+                test_size=test_size, 
+                random_state=random_state)
             
-            logger.info(f"Data split into train and test sets with test size {self.config['data']['test_size']}")
-            return X_train, X_test, y_train, y_test
+            X_train, X_val, y_train, y_val = train_test_split(
+                X_temp,
+                y_temp,
+                test_size=val_size/(1-test_size),  # Adjust val_size to account for the reduced dataset
+                random_state=random_state
+            )
+            
+            logger.info(f"Data split into train, validation, and test sets with test size {self.config['data']['test_size']} and validation size {self.config['data']['val_size']}")
+            return X_train, X_val, X_test, y_train, y_val, y_test
         except Exception as e:
             logger.error(f"Error splitting data: {e}")
             raise
