@@ -5,6 +5,7 @@ import pandas as pd
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 
 from src.features.feature_engineering import FeatureEngineering
+from src.models.model_trainer import ModelTrainer
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -45,18 +46,9 @@ def main():
         best_model = joblib.load(model_path)
         y_pred = best_model.predict(X_test_processed)
 
-        accuracy = accuracy_score(y_test, y_pred)
-        precision = precision_score(y_test, y_pred)
-        recall = recall_score(y_test, y_pred)
-        f1 = f1_score(y_test, y_pred)
-        auc = roc_auc_score(y_test, y_pred)
-
-        logger.info(f"Model Performance on Test Set:")
-        logger.info(f"Accuracy: {accuracy}")
-        logger.info(f"Precision: {precision}")
-        logger.info(f"Recall: {recall}")
-        logger.info(f"F1-Score: {f1}")
-        logger.info(f"AUC-ROC: {auc}")
+        # evaluate model and log metrics/curves via ModelTrainer
+        ModelTrainer_instance = ModelTrainer(config_path)
+        ModelTrainer_instance.evaluate_model(best_model, X_test_processed, y_test)
 
     except Exception as e:
         logger.error(f"Error in main execution: {e}")
