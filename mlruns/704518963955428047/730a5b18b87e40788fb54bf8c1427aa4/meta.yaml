@@ -1,0 +1,14 @@
+artifact_uri: file:///D:/Hari%20Is%20Bored/Customer%20Churn%20Prediction%20-%20Test/mlruns/704518963955428047/730a5b18b87e40788fb54bf8c1427aa4/artifacts
+end_time: 1775456866496
+entry_point_name: ''
+experiment_id: '704518963955428047'
+lifecycle_stage: active
+run_id: 730a5b18b87e40788fb54bf8c1427aa4
+run_name: random_forest
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1775456865857
+status: 3
+tags: []
+user_id: harig

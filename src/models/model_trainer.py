@@ -16,7 +16,7 @@ class ModelTrainer:
         with open(config_path, 'r') as file:
             self.config = yaml.safe_load(file)
 
-    def train_model(self, X_train, X_test, y_train, y_test):
+    def train_model(self, X_train, X_val, y_train, y_val):
 
         try:
             #parent experiment
@@ -40,13 +40,13 @@ class ModelTrainer:
                         continue
 
                     model.fit(X_train, y_train)
-                    y_pred = model.predict(X_test)
+                    y_pred = model.predict(X_val)
 
-                    accuracy = accuracy_score(y_test, y_pred)
-                    precision = precision_score(y_test, y_pred)
-                    recall = recall_score(y_test, y_pred)
-                    f1 = f1_score(y_test, y_pred)
-                    roc_auc = roc_auc_score(y_test, model.predict_proba(X_test)[:, 1])
+                    accuracy = accuracy_score(y_val, y_pred)
+                    precision = precision_score(y_val, y_pred)
+                    recall = recall_score(y_val, y_pred)
+                    f1 = f1_score(y_val, y_pred)
+                    roc_auc = roc_auc_score(y_val, model.predict_proba(X_val)[:, 1])
 
                     mlflow.log_metric(f"{algorithm['name']}_accuracy", accuracy)
                     mlflow.log_metric(f"{algorithm['name']}_precision", precision)

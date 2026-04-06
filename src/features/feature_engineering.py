@@ -1,6 +1,8 @@
 import pandas as pd
 import logging
 import yaml
+import joblib
+import os
 
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.compose import ColumnTransformer
@@ -15,6 +17,23 @@ class FeatureEngineering:
         with open(config_path, 'r') as file:
             self.config = yaml.safe_load(file)
         self.pipeline = None
+        self.selector = None
+        self.selected_feature_names = None
+
+    def save_pipeline(self, pipeline_path, selector_path):
+        os.makedirs(os.path.dirname(pipeline_path), exist_ok=True)
+        joblib.dump(self.pipeline, pipeline_path)
+        joblib.dump(self.selector, selector_path)
+        joblib.dump(self.selected_feature_names, selector_path.replace('.joblib', '_names.joblib'))
+        logger.info(f"Pipeline and selector saved to {pipeline_path} and {selector_path}")
+
+    def load_pipeline(self, pipeline_path, selector_path):
+        self.pipeline = joblib.load(pipeline_path)
+        self.selector = joblib.load(selector_path)
+        names_path = selector_path.replace('.joblib', '_names.joblib')
+        self.selected_feature_names = joblib.load(names_path)
+        logger.info(f"Pipeline and selector loaded from {pipeline_path} and {selector_path}")
+
 
     def build_pipeline(self, df):
         try:
@@ -113,26 +132,24 @@ class FeatureEngineering:
             logger.error("="*50)
             raise
 
-    def select_k_features(self, X_train, y_train, X_val, X_test, k=10):
+    def select_k_features(self, df, y=None, is_training=True, k=10):
         try:
             from sklearn.feature_selection import SelectKBest, f_classif
-            selector = SelectKBest(score_func=f_classif, k=k)
-            X_train_selected = selector.fit_transform(X_train, y_train)
-            X_val_selected = selector.transform(X_val)
-            X_test_selected = selector.transform(X_test)
+            if is_training:
+                self.selector = SelectKBest(score_func=f_classif, k=k)
+                df_selected = self.selector.fit_transform(df, y)
+            else:
+                if self.selector is None:
+                    raise ValueError("Selector has not been fitted. Call select_k_features with is_training=True first.")
+                df_selected = self.selector.transform(df)
 
-            selected_feature_names = selector.get_feature_names_out(input_features=X_train.columns).tolist()
-            logger.info(f"Selected {k} features: {selected_feature_names}")
-            logger.info("="*50)
-
-            X_train_selected = pd.DataFrame(X_train_selected, columns=selected_feature_names)
-            X_val_selected = pd.DataFrame(X_val_selected, columns=selected_feature_names, index=X_val.index)
-            X_test_selected = pd.DataFrame(X_test_selected, columns=selected_feature_names, index=X_test.index)
+            self.selected_feature_names = self.selector.get_feature_names_out(input_features=df.columns).tolist()    
+            df_selected = pd.DataFrame(df_selected, columns=self.selected_feature_names, index=df.index)
 
             logger.info(f"Feature selection completed successfully. Selected top {k} features.")
             logger.info("="*50)
 
-            return X_train_selected, X_val_selected, X_test_selected    
+            return df_selected   
         
         except Exception as e:
             logger.error(f"Error in feature selection: {str(e)}")
