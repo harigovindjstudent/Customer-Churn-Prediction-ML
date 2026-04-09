@@ -33,17 +33,61 @@ class ModelTrainer:
 
                     def objective(trial):
                         if algorithm['name'] == 'logistic_regression':
-                            C = trial.suggest_float("C", 0.01, 10.0, log=True)
-                            model = LogisticRegression(C=C, max_iter=1000)
+                            C = trial.suggest_float("C", 1e-3, 10.0, log=True)
+                            penalty = trial.suggest_categorical("penalty", ["l2"])
+                            solver = trial.suggest_categorical("solver", ["lbfgs", "liblinear"])
+
+                            model = LogisticRegression(
+                                C=C,
+                                penalty=penalty,
+                                solver=solver,
+                                max_iter=1000
+                            )
+
                         elif algorithm['name'] == 'random_forest':
-                            n_estimators = trial.suggest_int("n_estimators", 50, 200)
-                            max_depth = trial.suggest_int("max_depth", 3, 15)
-                            model = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth, random_state=42)
+                            n_estimators = trial.suggest_int("n_estimators", 100, 300)
+                            max_depth = trial.suggest_int("max_depth", 3, 20)
+                            min_samples_split = trial.suggest_int("min_samples_split", 2, 10)
+                            min_samples_leaf = trial.suggest_int("min_samples_leaf", 1, 10)
+                            max_features = trial.suggest_categorical("max_features", ["sqrt", "log2", None])
+                            bootstrap = trial.suggest_categorical("bootstrap", [True, False])
+
+                            model = RandomForestClassifier(
+                                n_estimators=n_estimators,
+                                max_depth=max_depth,
+                                min_samples_split=min_samples_split,
+                                min_samples_leaf=min_samples_leaf,
+                                max_features=max_features,
+                                bootstrap=bootstrap,
+                                random_state=42,
+                                n_jobs=-1
+                            )
+
                         elif algorithm['name'] == 'xgboost':
-                            n_estimators = trial.suggest_int("n_estimators", 50, 200)
+                            n_estimators = trial.suggest_int("n_estimators", 100, 300)
                             learning_rate = trial.suggest_float("learning_rate", 0.01, 0.3, log=True)
                             max_depth = trial.suggest_int("max_depth", 3, 10)
-                            model = xgb.XGBClassifier(n_estimators=n_estimators, learning_rate=learning_rate, max_depth=max_depth, random_state=42)
+                            subsample = trial.suggest_float("subsample", 0.6, 1.0)
+                            colsample_bytree = trial.suggest_float("colsample_bytree", 0.6, 1.0)
+                            gamma = trial.suggest_float("gamma", 0, 5)
+                            reg_alpha = trial.suggest_float("reg_alpha", 0, 5)
+                            reg_lambda = trial.suggest_float("reg_lambda", 0, 5)
+
+                            model = xgb.XGBClassifier(
+                                n_estimators=n_estimators,
+                                learning_rate=learning_rate,
+                                max_depth=max_depth,
+                                subsample=subsample,
+                                colsample_bytree=colsample_bytree,
+                                gamma=gamma,
+                                reg_alpha=reg_alpha,
+                                reg_lambda=reg_lambda,
+                                random_state=42,
+                                use_label_encoder=False,
+                                eval_metric="logloss",
+                                n_jobs=-1
+                            )
+
                         else:
                             return 0.0
                         
@@ -53,7 +97,7 @@ class ModelTrainer:
                         return f1
 
                     study = optuna.create_study(direction="maximize")
-                    study.optimize(objective, n_trials=15)
+                    study.optimize(objective, n_trials=300)
 
                     best_params = study.best_params
                     logger.info(f"Best hyperparameters for {algorithm['name']}: {best_params}")
