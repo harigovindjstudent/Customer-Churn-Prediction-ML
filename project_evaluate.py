@@ -26,7 +26,7 @@ def main():
             return
         
         FeatureEngineering_instance = FeatureEngineering(config_path)
-
+    
         #load preprocessing pipeline and selector
         FeatureEngineering_instance.load_pipeline('models/preprocessing_pipeline.joblib', 'models/selector.joblib')
 

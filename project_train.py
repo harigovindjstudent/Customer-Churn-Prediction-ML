@@ -6,6 +6,7 @@ from src.data.data_loader import DataLoader
 from src.features.feature_engineering import FeatureEngineering
 from src.models.model_trainer import ModelTrainer
 
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
