@@ -1,0 +1,9 @@
+INFO:src.models.model_trainer:Best hyperparameters for random_forest: {'n_estimators': 122, 'max_depth': 7, 'min_samples_split': 3, 'min_samples_leaf': 6, 'max_features': 'sqrt', 'bootstrap': False}
+INFO:src.models.model_trainer:random_forest - Accuracy: 0.814, Precision: 0.5491071428571429, Recall: 0.7616099071207431, F1 Score: 0.6381322957198443, ROC AUC: 0.8625013480775756
+INFO:src.models.model_trainer:==================================================
+
+INFO:src.models.model_trainer:xgboost - Accuracy: 0.842, Precision: 0.6137566137566137, Recall: 0.718266253869969, F1 Score: 0.6619115549215406, ROC AUC: 0.8688945237800885
+INFO:src.models.model_trainer:==================================================
+INFO:src.models.model_trainer:Model saved to models/best_model.pkl
+INFO:src.models.model_trainer:==================================================
+INFO:__main__:Best model trained with F1 Score: 0.6619115549215406

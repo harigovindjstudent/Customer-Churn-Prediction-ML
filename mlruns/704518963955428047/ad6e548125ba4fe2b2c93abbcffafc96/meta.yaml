@@ -1,0 +1,14 @@
+artifact_uri: file:///D:/Hari%20Is%20Bored/Customer%20Churn%20Prediction%20-%20Test/mlruns/704518963955428047/ad6e548125ba4fe2b2c93abbcffafc96/artifacts
+end_time: 1775805895721
+entry_point_name: ''
+experiment_id: '704518963955428047'
+lifecycle_stage: active
+run_id: ad6e548125ba4fe2b2c93abbcffafc96
+run_name: logistic_regression
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1775805890013
+status: 3
+tags: []
+user_id: harig

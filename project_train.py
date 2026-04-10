@@ -2,6 +2,7 @@ import logging
 import yaml
 import mlflow
 import os
+import joblib
 from src.data.data_loader import DataLoader
 from src.features.feature_engineering import FeatureEngineering
 from src.models.model_trainer import ModelTrainer
@@ -52,7 +53,10 @@ def main():
         FeatureEngineering_instance.save_pipeline('models/preprocessing_pipeline.joblib', 'models/selector.joblib')
 
         #model training
-        best_model, best_score = ModelTrainer_instance.train_model(X_train_processed, X_val_processed, y_train, y_val)
+        best_model, best_score, best_threshold = ModelTrainer_instance.train_model(X_train_processed, X_val_processed, y_train, y_val)
+
+        # Save optimal threshold for evaluation
+        joblib.dump(best_threshold, 'models/best_threshold.joblib')
 
         logger.info(f"Best model trained with F1 Score: {best_score}")
         logger.info("="*50)
