@@ -2,7 +2,7 @@ import yaml
 import joblib
 import numpy as np
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, VotingClassifier
 import xgboost as xgb
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, RocCurveDisplay, PrecisionRecallDisplay
 import matplotlib.pyplot as plt
@@ -26,6 +26,8 @@ class ModelTrainer:
             
             best_model = None
             best_score = 0
+            
+            trained_models = {}
 
             for algorithm in self.config['model']['algorithm']:
                 #nested = True allows us to track each algorithm's performance separately under the same parent run
@@ -127,10 +129,40 @@ class ModelTrainer:
 
                     logger.info(f"{algorithm['name']} - Accuracy: {accuracy}, Precision: {precision}, Recall: {recall}, F1 Score: {f1}, ROC AUC: {roc_auc}")
                     logger.info("="*50)
+                    
+                    trained_models[algorithm['name']] = model
 
-                if f1 > best_score:
-                    best_score = f1
-                    best_model = model
+            # Train the ensemble model
+            with mlflow.start_run(run_name='ensemble', nested=True):
+                ensemble_model = VotingClassifier(
+                    estimators=[
+                        ('xgboost', trained_models['xgboost']),
+                        ('random_forest', trained_models['random_forest']),
+                        ('logistic_regression', trained_models['logistic_regression'])
+                    ],
+                    voting='soft'
+                )
+                
+                ensemble_model.fit(X_train, y_train)
+                y_pred = ensemble_model.predict(X_val)
+
+                accuracy = accuracy_score(y_val, y_pred)
+                precision = precision_score(y_val, y_pred)
+                recall = recall_score(y_val, y_pred)
+                f1 = f1_score(y_val, y_pred)
+                roc_auc = roc_auc_score(y_val, ensemble_model.predict_proba(X_val)[:, 1])
+
+                mlflow.log_metric("ensemble_accuracy", accuracy)
+                mlflow.log_metric("ensemble_precision", precision)
+                mlflow.log_metric("ensemble_recall", recall)
+                mlflow.log_metric("ensemble_f1_score", f1)
+                mlflow.log_metric("ensemble_roc_auc", roc_auc)
+
+                logger.info(f"Ensemble Model - Accuracy: {accuracy}, Precision: {precision}, Recall: {recall}, F1 Score: {f1}, ROC AUC: {roc_auc}")
+                logger.info("="*50)
+
+                best_model = ensemble_model
+                best_score = f1
 
             self._save_model(best_model)
             return best_model, best_score    
