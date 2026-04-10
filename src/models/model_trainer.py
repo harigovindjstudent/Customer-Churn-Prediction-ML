@@ -92,15 +92,9 @@ class ModelTrainer:
                             return 0.0
                         
                         model.fit(X_train, y_train)
-                        y_probs = model.predict_proba(X_val)[:, 1]
-                        
-                        # Find best F1 on validation for this trial
-                        best_f1_t = 0
-                        for t in np.linspace(0.1, 0.9, 20):
-                            y_pred_t = (y_probs >= t).astype(int)
-                            best_f1_t = max(best_f1_t, f1_score(y_val, y_pred_t))
-                        
-                        return best_f1_t
+                        y_pred = model.predict(X_val)
+                        f1 = f1_score(y_val, y_pred)
+                        return f1
 
                     study = optuna.create_study(direction="maximize")
                     study.optimize(objective, n_trials=300)
@@ -117,29 +111,13 @@ class ModelTrainer:
                         model = xgb.XGBClassifier(**best_params, random_state=42)
 
                     model.fit(X_train, y_train)
-                    y_probs = model.predict_proba(X_val)[:, 1]
-
-                    # Threshold Tuning
-                    thresholds = np.linspace(0.1, 0.9, 81)
-                    best_threshold = 0.5
-                    best_f1_for_thresh = 0
-                    for t in thresholds:
-                        y_pred_t = (y_probs >= t).astype(int)
-                        f1_t = f1_score(y_val, y_pred_t)
-                        if f1_t > best_f1_for_thresh:
-                            best_f1_for_thresh = f1_t
-                            best_threshold = t
-                    
-                    logger.info(f"Optimal threshold for {algorithm['name']}: {best_threshold:.3f}")
-                    mlflow.log_param(f"{algorithm['name']}_optimal_threshold", best_threshold)
-
-                    y_pred = (y_probs >= best_threshold).astype(int)
+                    y_pred = model.predict(X_val)
 
                     accuracy = accuracy_score(y_val, y_pred)
                     precision = precision_score(y_val, y_pred)
                     recall = recall_score(y_val, y_pred)
                     f1 = f1_score(y_val, y_pred)
-                    roc_auc = roc_auc_score(y_val, y_probs)
+                    roc_auc = roc_auc_score(y_val, model.predict_proba(X_val)[:, 1])
 
                     mlflow.log_metric(f"{algorithm['name']}_accuracy", accuracy)
                     mlflow.log_metric(f"{algorithm['name']}_precision", precision)
@@ -153,30 +131,27 @@ class ModelTrainer:
                 if f1 > best_score:
                     best_score = f1
                     best_model = model
-                    self.best_threshold = best_threshold
 
             self._save_model(best_model)
-            return best_model, best_score, getattr(self, "best_threshold", 0.5)    
+            return best_model, best_score    
 
         except Exception as e:
             logger.error(f"Error training model: {e}")
             logger.error("="*50)
             raise
 
-    def evaluate_model(self, model, X_test, y_test, threshold=0.5):
+    def evaluate_model(self, model, X_test, y_test):
         try:
             mlflow.set_experiment("customer_churn_prediction")
             with mlflow.start_run(run_name="final_model_evaluation", nested=True):
-                y_probs = model.predict_proba(X_test)[:, 1]
-                y_pred = (y_probs >= threshold).astype(int)
+                y_pred = model.predict(X_test)
 
                 accuracy = accuracy_score(y_test, y_pred)
                 precision = precision_score(y_test, y_pred)
                 recall = recall_score(y_test, y_pred)
                 f1 = f1_score(y_test, y_pred)
-                roc_auc = roc_auc_score(y_test, y_probs)
+                roc_auc = roc_auc_score(y_test, model.predict_proba(X_test)[:, 1])
 
-                mlflow.log_param("evaluation_threshold", threshold)
                 mlflow.log_metric("test_accuracy", accuracy)
                 mlflow.log_metric("test_precision", precision)
                 mlflow.log_metric("test_recall", recall)

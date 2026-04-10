@@ -44,17 +44,11 @@ def main():
         #load best model from mlflow
         model_path = config['model']['best_model_path']
         best_model = joblib.load(model_path)
-        
-        #load best threshold
-        try:
-            best_threshold = joblib.load('models/best_threshold.joblib')
-        except FileNotFoundError:
-            best_threshold = 0.5
-            logger.warning("Threshold file not found, defaulting to 0.5")
+        y_pred = best_model.predict(X_test_processed)
 
         # evaluate model and log metrics/curves via ModelTrainer
         ModelTrainer_instance = ModelTrainer(config_path)
-        ModelTrainer_instance.evaluate_model(best_model, X_test_processed, y_test, threshold=best_threshold)
+        ModelTrainer_instance.evaluate_model(best_model, X_test_processed, y_test)
 
     except Exception as e:
         logger.error(f"Error in main execution: {e}")
