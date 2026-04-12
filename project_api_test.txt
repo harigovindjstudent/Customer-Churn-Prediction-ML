@@ -1,0 +1,121 @@
+Here are some sample data points from test data to try testing:
+Combined Request - Copy everything from line 4 to line 50 execute
+
+[
+  {
+    "RowNumber": 6253,
+    "CustomerId": 15687492,
+    "Surname": "Anderson",
+    "CreditScore": 596,
+    "Geography": "Germany",
+    "Gender": "Male",
+    "Age": 32,
+    "Tenure": 3,
+    "Balance": 96709.07,
+    "NumOfProducts": 2,
+    "HasCrCard": 0,
+    "IsActiveMember": 0,
+    "EstimatedSalary": 41788.37
+  },
+  {
+    "RowNumber": 5203,
+    "CustomerId": 15713354,
+    "Surname": "Morrice",
+    "CreditScore": 597,
+    "Geography": "Germany",
+    "Gender": "Female",
+    "Age": 22,
+    "Tenure": 6,
+    "Balance": 101528.61,
+    "NumOfProducts": 1,
+    "HasCrCard": 1,
+    "IsActiveMember": 0,
+    "EstimatedSalary": 70529.00
+  },
+  {
+    "RowNumber": 2751,
+    "CustomerId": 15767474,
+    "Surname": "Lorenzo",
+    "CreditScore": 481,
+    "Geography": "France",
+    "Gender": "Female",
+    "Age": 57,
+    "Tenure": 9,
+    "Balance": 0.00,
+    "NumOfProducts": 3,
+    "HasCrCard": 1,
+    "IsActiveMember": 1,
+    "EstimatedSalary": 169719.35
+  }
+]
+
+
+Individual Requests:
+
+Test Data 1:
+[
+  {
+    "RowNumber": 6253,
+    "CustomerId": 15687492,
+    "Surname": "Anderson",
+    "CreditScore": 596,
+    "Geography": "Germany",
+    "Gender": "Male",
+    "Age": 32,
+    "Tenure": 3,
+    "Balance": 96709.07,
+    "NumOfProducts": 2,
+    "HasCrCard": 0,
+    "IsActiveMember": 0,
+    "EstimatedSalary": 41788.37
+  }
+]
+
+Test Data 2:
+[
+  {
+    "RowNumber": 5203,
+    "CustomerId": 15713354,
+    "Surname": "Morrice",
+    "CreditScore": 597,
+    "Geography": "Germany",
+    "Gender": "Female",
+    "Age": 22,
+    "Tenure": 6,
+    "Balance": 101528.61,
+    "NumOfProducts": 1,
+    "HasCrCard": 1,
+    "IsActiveMember": 0,
+    "EstimatedSalary": 70529.00
+  }
+]
+
+Test Data 3:
+[
+  {
+    "RowNumber": 2751,
+    "CustomerId": 15767474,
+    "Surname": "Lorenzo",
+    "CreditScore": 481,
+    "Geography": "France",
+    "Gender": "Female",
+    "Age": 57,
+    "Tenure": 9,
+    "Balance": 0.00,
+    "NumOfProducts": 3,
+    "HasCrCard": 1,
+    "IsActiveMember": 1,
+    "EstimatedSalary": 169719.35
+  }
+]
+
+
+EXPECTED PREDICTIONS (Real "Exited" Values):
+Test Data 1 (Anderson) : 0  (Did not churn)
+Test Data 2 (Morrice)  : 1  (Churned)
+Test Data 3 (Lorenzo)  : 1  (Churned)
+
+Expected result for combined request:
+{
+  "predictions": [0, 1, 1]
+}
